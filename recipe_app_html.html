@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mes Recettes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+        }
+
+        .recipe-grid {
+            display: grid;
+            gap: 20px;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        .recipe-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recipe-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .recipe-card:active {
+            transform: scale(0.98);
+        }
+
+        .recipe-card:hover::before {
+            left: 100%;
+        }
+
+        .recipe-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .recipe-title {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .recipe-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .add-recipe-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px dashed rgba(255,255,255,0.5);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .add-recipe-btn:active {
+            transform: scale(0.98);
+        }
+
+        .add-recipe-btn .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+            animation: fadeInUp 0.8s ease 0.4s backwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍳 Mes Recettes</h1>
+            <p>Toutes mes recettes préférées</p>
+        </div>
+
+        <div class="recipe-grid">
+            <div class="recipe-card" onclick="openPDF('Frghy.pdf')">
+                <div class="recipe-icon">🥣</div>
+                <div class="recipe-title">Petits-Déj de Champion</div>
+                <div class="recipe-description">Overnight Oats & Porridge - Énergie et plaisir pour bien commencer la journée</div>
+            </div>
+
+            <div class="recipe-card" onclick="openPDF('Bwjsjs-1.pdf')">
+                <div class="recipe-icon">🍝</div>
+                <div class="recipe-title">Carbo Crémeuse & Déglacée</div>
+                <div class="recipe-description">La vraie recette italienne avec la technique du déglacage au vin blanc</div>
+            </div>
+
+            <!-- AJOUTER DES RECETTES ICI : Copie le bloc ci-dessous et modifie-le -->
+            <!--
+            <div class="recipe-card" onclick="openPDF('nom_du_fichier.pdf')">
+                <div class="recipe-icon">🥘</div>
+                <div class="recipe-title">Titre de la recette</div>
+                <div class="recipe-description">Description courte de la recette</div>
+            </div>
+            -->
+        </div>
+
+        <div class="add-recipe-btn" onclick="alert('Pour ajouter une recette :\n1. Ajoute ton PDF dans assets/\n2. Copie un bloc recipe-card\n3. Change le nom du fichier et le texte')">
+            <div class="icon">➕</div>
+            <div>Ajouter une recette</div>
+        </div>
+
+        <div class="footer">
+            Made with ❤️ for good food
+        </div>
+    </div>
+
+    <script>
+        function openPDF(filename) {
+            // Cette fonction sera gérée par Android
+            if (typeof Android !== 'undefined' && Android.openPDF) {
+                Android.openPDF(filename);
+            } else {
+                // Fallback pour test dans navigateur
+                window.location.href = filename;
+            }
+        }
+    </script>
+</body>
+</html>
