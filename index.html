@@ -2,479 +2,443 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CookBook App + IA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mes Recettes - Joshua Jaunasse</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Icônes -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FAFAFA;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        h1, h2, h3, .serif {
-            font-family: 'Playfair Display', serif;
-        }
-
-        /* Masquer la scrollbar */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Effet Glassmorphism */
-        .glass {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-
-        /* Animation d'apparition */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-card {
-            animation: fadeUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-
-        /* Animation de chargement (shimmer) */
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        .loading-shimmer {
-            animation: shimmer 2s infinite linear;
-            background: linear-gradient(to right, #f6f7f8 4%, #edeef1 25%, #f6f7f8 36%);
-            background-size: 1000px 100%;
-        }
-
-        /* Style de l'image de couverture */
-        .card-image {
-            height: 180px;
-            width: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .card-container:active .card-image {
-            transform: scale(1.05);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            transition: opacity 0.3s ease;
-        }
-        
-        /* Bouton IA scintillant */
-        .ai-sparkle-btn {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        .ai-sparkle-btn:hover {
-            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
-        }
-        .ai-sparkle-btn::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-        @keyframes shine {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
-        }
+        :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
+        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; padding-bottom: calc(80px + var(--sab)); }
+        input, textarea, select { font-size: 16px !important; }
+        h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); padding-top: max(1rem, var(--sat)); }
+        .animate-card { animation: fadeUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        .card-image { height: 200px; width: 100%; object-fit: cover; transition: transform 0.7s ease; }
+        .card-container:active .card-image { transform: scale(1.05); }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); transition: opacity 0.3s ease; }
+        .recipe-content { color: #374151; font-size: 0.95rem; line-height: 1.6; }
+        .recipe-content h3 { font-size: 1.3rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.8rem; color: #ea580c; font-family: 'Playfair Display', serif; border-bottom: 2px solid #fed7aa; padding-bottom: 0.2rem; display: inline-block; }
+        .recipe-content ul { background-color: #fefce8; border: 1px solid #fef08a; border-radius: 1rem; padding: 1.2rem; margin-bottom: 1.5rem; list-style: none; }
+        .recipe-content ul li { margin-bottom: 0.5rem; padding-left: 1.2rem; position: relative; }
+        .recipe-content ul li::before { content: '•'; color: #ca8a04; font-weight: bold; position: absolute; left: 0; }
+        .dynamic-qty { font-weight: 700; color: #d97706; margin-right: 3px; }
+        .recipe-content ol { counter-reset: step-counter; list-style: none; padding: 0; }
+        .recipe-content ol li { position: relative; padding-left: 2.5rem; margin-bottom: 1.2rem; }
+        .recipe-content ol li::before { content: counter(step-counter); counter-increment: step-counter; position: absolute; left: 0; top: 0; width: 1.8rem; height: 1.8rem; background-color: #fdba74; color: white; border-radius: 50%; text-align: center; line-height: 1.8rem; font-weight: bold; font-size: 0.85rem; }
+        .chat-msg { padding: 10px 14px; border-radius: 14px; max-width: 85%; font-size: 0.9rem; margin-bottom: 8px; }
+        .chat-user { background-color: #f3f4f6; color: #1f2937; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-ai { background-color: #eff6ff; color: #1e40af; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #dbeafe; }
     </style>
 </head>
 <body class="pb-24">
 
-    <!-- Header Fixe -->
-    <header class="glass fixed top-0 w-full z-40 px-6 py-4 flex justify-between items-center transition-all duration-300" id="header">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Mes Recettes</h1>
-            <p class="text-xs text-gray-500 font-medium tracking-wide uppercase">Cuisine Maison & IA</p>
-        </div>
-        <button onclick="openModal()" class="bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg shadow-orange-500/30 transition-transform active:scale-90">
-            <i data-lucide="plus" class="w-5 h-5"></i>
-        </button>
-    </header>
-
-    <div class="h-20"></div>
-
-    <main class="container mx-auto px-4 max-w-lg">
-        
-        <!-- Liste des recettes (Remplie par JS) -->
-        <div id="recipe-grid" class="grid gap-6 mt-4">
-            <!-- Les cartes seront injectées ici -->
-        </div>
-
-        <!-- État vide (si aucune recette) -->
-        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center opacity-50">
-            <i data-lucide="utensils-crossed" class="w-16 h-16 mb-4 text-gray-300"></i>
-            <p class="text-gray-400">Aucune recette pour le moment</p>
-        </div>
-
-    </main>
-
-    <!-- MODAL D'AJOUT -->
-    <div id="modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl transform transition-transform duration-300 translate-y-full sm:translate-y-0 flex flex-col max-h-[90vh]" id="modal-content">
-            
-            <div class="flex justify-between items-center mb-4 flex-shrink-0">
-                <h2 class="text-xl font-bold text-gray-800">Nouvelle Recette</h2>
-                <button onclick="closeModal()" class="p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+    <!-- Header -->
+    <header class="glass fixed top-0 w-full z-40 px-6 py-4 transition-all duration-300">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Mes Recettes</h1>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Carnet Digital</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openTrashModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 p-3 rounded-full transition-colors relative">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    <span id="trash-badge" class="hidden absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                <button id="btn-config-key" onclick="openApiModal()" class="hidden bg-gray-100 hover:bg-gray-200 text-gray-600 p-3 rounded-full transition-colors">
+                    <i data-lucide="key" class="w-5 h-5"></i>
+                </button>
+                <button onclick="openAddModal()" class="bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg shadow-orange-500/30 transition-transform active:scale-90">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
                 </button>
             </div>
+        </div>
+        
+        <!-- BARRE DE RECHERCHE -->
+        <div class="relative">
+            <i data-lucide="search" class="absolute left-4 top-3.5 w-5 h-5 text-gray-400"></i>
+            <input type="text" id="search-input" onkeyup="searchRecipes()" placeholder="Rechercher (ex: avoine, pâtes...)" 
+                   class="w-full pl-12 pr-4 py-3 bg-gray-100 rounded-2xl border-none focus:bg-white focus:ring-2 focus:ring-orange-200 outline-none text-sm transition-all shadow-inner">
+        </div>
+    </header>
 
-            <div class="overflow-y-auto no-scrollbar pb-4">
-                
-                <!-- SECTION IA : Inspiration -->
-                <div class="mb-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                    <label class="block text-xs font-bold text-indigo-600 mb-2 uppercase tracking-wide flex items-center gap-1">
-                        <i data-lucide="sparkles" class="w-3 h-3"></i> Inspiration Express
-                    </label>
-                    <div class="flex gap-2">
-                        <input type="text" id="ai-ingredients" placeholder="Ex: 3 œufs, lait, farine..." 
-                               class="flex-1 px-3 py-2 rounded-xl bg-white border border-indigo-200 text-sm focus:outline-none focus:border-indigo-500">
-                        <button onclick="generateRecipeInfo()" id="btn-generate" class="ai-sparkle-btn text-white px-4 py-2 rounded-xl font-medium text-sm shadow-md active:scale-95 transition-transform flex items-center gap-2">
-                            <span>Générer</span>
-                        </button>
-                    </div>
-                    <p class="text-[10px] text-indigo-400 mt-2 leading-tight">L'IA remplira le titre et la description pour vous.</p>
-                </div>
+    <div class="h-40"></div>
 
-                <form id="add-recipe-form" class="space-y-4">
-                    <!-- Titre -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Titre du plat</label>
-                        <input type="text" id="input-title" required placeholder="Ex: Lasagnes de Maman" 
-                               class="w-full px-4 py-3 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-orange-500 transition-all outline-none">
-                    </div>
+    <main class="container mx-auto px-4 max-w-lg">
+        <div id="recipe-grid" class="grid gap-6 mt-2 pb-10"></div>
+        
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center opacity-50">
+            <i data-lucide="chef-hat" class="w-20 h-20 mb-4 text-gray-300"></i>
+            <p class="text-gray-400 font-medium">Aucune recette trouvée.</p>
+        </div>
 
-                    <!-- Description -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Description courte</label>
-                        <textarea id="input-desc" rows="2" placeholder="Temps de cuisson, ingrédients clés..." 
-                                  class="w-full px-4 py-3 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-orange-500 transition-all outline-none resize-none"></textarea>
-                    </div>
+        <!-- FOOTER / SIGNATURE -->
+        <div class="mt-12 text-center pb-8 border-t border-gray-200 pt-8">
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-widest mb-2">Application créée par</p>
+            <p class="text-lg font-serif font-bold text-gray-700">Joshua Jaunasse</p>
+            <p class="text-[10px] text-indigo-400 mt-1 flex items-center justify-center gap-1 opacity-80">
+                <span>Avec l'aide de Gemini</span>
+                <i data-lucide="sparkles" class="w-3 h-3"></i>
+            </p>
+        </div>
+    </main>
 
-                    <!-- Tags (Optionnel) -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tags (séparés par virgule)</label>
-                        <input type="text" id="input-tags" placeholder="Hiver, Fromage, Rapide" 
-                               class="w-full px-4 py-3 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-orange-500 transition-all outline-none">
-                    </div>
-
-                    <!-- Image Upload & Génération -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Photo du plat</label>
-                        
-                        <div class="flex gap-2 mb-2">
-                            <!-- Bouton Upload Classique -->
-                            <div class="relative flex-1">
-                                <input type="file" id="input-image" accept="image/*" class="hidden" onchange="handleImagePreview(this)">
-                                <label for="input-image" class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-100 text-gray-600 font-medium cursor-pointer hover:bg-gray-200 transition-colors border border-gray-200 border-dashed h-full">
-                                    <i data-lucide="upload" class="w-4 h-4"></i>
-                                    <span class="text-xs sm:text-sm">Uploader</span>
-                                </label>
-                            </div>
-
-                            <!-- Bouton Génération IA -->
-                            <button type="button" onclick="generateImageWithAI()" id="btn-generate-img" class="flex-1 ai-sparkle-btn text-white px-4 py-3 rounded-xl font-medium text-xs sm:text-sm shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2">
-                                <i data-lucide="image-plus" class="w-4 h-4"></i>
-                                <span>Générer IA</span>
-                            </button>
-                        </div>
-
-                        <!-- Zone de preview -->
-                        <div id="image-container" class="relative hidden group">
-                             <img id="image-preview" class="w-full h-40 object-cover rounded-xl shadow-sm" />
-                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center text-white text-xs">
-                                 Image sélectionnée
-                             </div>
-                        </div>
-                        <p class="text-[10px] text-gray-400 mt-1 ml-1" id="image-status-text">Aucune image sélectionnée</p>
-                    </div>
-
-                    <!-- PDF File -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fichier PDF</label>
-                        <div class="relative">
-                            <input type="file" id="input-pdf" accept="application/pdf" class="hidden" required onchange="handlePdfName(this)">
-                            <label for="input-pdf" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 text-red-600 font-medium cursor-pointer hover:bg-red-100 transition-colors border border-red-100 border-dashed">
-                                <i data-lucide="file-text" class="w-5 h-5"></i>
-                                <span id="pdf-label">Sélectionner le PDF...</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Submit -->
-                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/30 transition-transform active:scale-95 mt-4">
-                        Enregistrer la recette
-                    </button>
-                </form>
+    <!-- MODAL CORBEILLE -->
+    <div id="trash-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center sm:p-4">
+        <div class="bg-white w-full max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl transform transition-transform duration-300 translate-y-full sm:translate-y-0 flex flex-col h-[85vh]">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <i data-lucide="trash-2" class="w-5 h-5 text-gray-400"></i> Corbeille
+                </h2>
+                <button onclick="closeTrashModal()" class="p-2 bg-gray-100 rounded-full text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <div id="trash-list" class="flex-1 overflow-y-auto space-y-3 pb-4"></div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-100 space-y-3">
+                <button onclick="emptyTrash()" class="w-full py-3 text-red-500 font-bold bg-red-50 rounded-xl hover:bg-red-100 text-sm">
+                    Vider la corbeille
+                </button>
+                <button onclick="resetApp()" class="w-full py-3 text-gray-400 font-medium text-xs hover:text-red-500 transition-colors">
+                    ⚠️ Réinitialiser l'application (Usine)
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL ALERT (Pour les messages IA) -->
-    <div id="alert-modal" class="modal-overlay fixed inset-0 z-[60] hidden flex items-center justify-center p-8">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center transform scale-95 opacity-0 transition-all duration-300" id="alert-content">
-            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600">
-                <i data-lucide="sparkles" class="w-8 h-8"></i>
+    <!-- MODAL LECTURE -->
+    <div id="read-modal" class="modal-overlay fixed inset-0 z-50 hidden overflow-y-auto overscroll-contain">
+        <div class="min-h-screen px-0 sm:px-4 py-0 sm:py-8 flex items-center justify-center">
+            <div class="bg-white w-full max-w-lg sm:rounded-3xl shadow-2xl overflow-hidden relative min-h-screen sm:min-h-0">
+                <div class="relative h-64 sm:h-72">
+                    <img id="read-img" class="w-full h-full object-cover" src="" alt="Plat">
+                    <button onclick="closeReadModal()" class="absolute top-4 right-4 bg-white/90 backdrop-blur text-gray-800 p-2 rounded-full hover:bg-white shadow-lg z-10 pt-2 pb-2"><i data-lucide="x" class="w-6 h-6"></i></button>
+                    <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 right-6 text-white">
+                         <div id="read-tags" class="flex gap-2 mb-3 flex-wrap"></div>
+                         <h2 id="read-title" class="text-3xl font-bold font-serif leading-none shadow-black drop-shadow-md"></h2>
+                    </div>
+                </div>
+
+                <div class="p-6 pb-20">
+                    <div class="flex items-center justify-between mb-6 bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                        <div class="flex items-center gap-2 text-orange-800">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                            <span class="font-bold text-sm uppercase tracking-wide">Portions</span>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white rounded-xl px-2 py-1 shadow-sm border border-orange-200">
+                            <button onclick="changePortions(-1)" class="w-10 h-10 flex items-center justify-center text-orange-600 active:bg-orange-50 rounded-lg font-bold text-xl touch-manipulation">-</button>
+                            <span id="portion-display" class="font-bold text-gray-800 w-6 text-center text-lg">2</span>
+                            <button onclick="changePortions(1)" class="w-10 h-10 flex items-center justify-center text-orange-600 active:bg-orange-50 rounded-lg font-bold text-xl touch-manipulation">+</button>
+                        </div>
+                    </div>
+
+                    <p id="read-desc" class="text-gray-600 text-lg italic mb-6 border-l-4 border-orange-400 pl-4 leading-relaxed"></p>
+                    
+                    <div class="bg-indigo-50 rounded-2xl p-4 mb-8 flex items-center gap-4 active:bg-indigo-100 transition-colors border border-indigo-100 cursor-pointer" onclick="askSommelierInternal()">
+                        <div class="bg-white p-3 rounded-full text-indigo-600 shrink-0 shadow-sm"><i data-lucide="wine" class="w-6 h-6"></i></div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-indigo-900 text-sm uppercase tracking-wider">Accord Mets & Vins</h4>
+                            <p id="sommelier-text" class="text-indigo-600 text-xs mt-1">Toucher pour demander à l'IA...</p>
+                        </div>
+                    </div>
+
+                    <div id="read-content" class="recipe-content text-base leading-relaxed border-b pb-8 mb-8 border-gray-100"></div>
+
+                    <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 pb-8">
+                        <div class="flex items-center gap-2 mb-4 text-gray-700 font-bold font-serif text-lg">
+                            <i data-lucide="message-circle-question" class="w-5 h-5 text-orange-500"></i><h3>SOS Chef</h3>
+                        </div>
+                        <div id="chat-history" class="flex flex-col gap-2 max-h-48 overflow-y-auto mb-3 text-sm"></div>
+                        <div class="flex gap-2">
+                            <input type="text" id="chat-input" placeholder="Une question ?" inputmode="text" class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-orange-500 text-base shadow-sm">
+                            <button onclick="sendChatMessage()" class="bg-orange-500 text-white px-4 rounded-xl active:bg-orange-600 transition-colors"><i data-lucide="send" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL API KEY -->
+    <div id="api-modal" class="modal-overlay fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Clé API</h3>
+            <p class="text-gray-500 text-sm mb-4">La clé est déjà intégrée.</p>
+            <input type="text" id="api-input" placeholder="Clé API..." class="w-full px-4 py-3 rounded-xl bg-gray-50 border mb-4 font-mono text-base">
+            <button onclick="saveApiKey()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl">Enregistrer</button>
+        </div>
+    </div>
+
+    <!-- MODAL AJOUT/EDITION -->
+    <div id="add-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center sm:p-4">
+        <div class="bg-white w-full max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl transform transition-transform duration-300 translate-y-full sm:translate-y-0 flex flex-col h-[90vh] sm:max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <h2 class="text-2xl font-serif font-bold text-gray-800" id="modal-title">Éditer</h2>
+                <button onclick="closeAddModal()" class="p-2 bg-gray-100 rounded-full text-gray-500"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+
+            <div class="overflow-y-auto no-scrollbar pb-20 px-1 flex-1">
+                <form id="add-recipe-form" class="space-y-5">
+                    <input type="hidden" id="input-id">
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Nom du plat</label>
+                        <input type="text" id="input-title" required placeholder="Ex: Tiramisu" inputmode="text" class="w-full px-5 py-3 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-orange-500 focus:bg-white transition-all outline-none font-medium text-lg">
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                        <label class="block text-sm font-bold text-blue-800 mb-2 ml-1">Importer depuis PDF</label>
+                        <div class="relative mb-3">
+                            <input type="file" id="input-pdf" accept="application/pdf" class="hidden" onchange="handlePdfSelect(this)">
+                            <label for="input-pdf" class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-blue-200 text-gray-600 text-sm cursor-pointer hover:bg-blue-50 transition-colors">
+                                <i data-lucide="file-text" class="w-5 h-5 text-blue-500"></i>
+                                <span id="pdf-label" class="truncate">Choisir un fichier...</span>
+                            </label>
+                        </div>
+                        <button type="button" id="btn-extract-pdf" onclick="extractAndFormatPdf()" class="hidden w-full bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm shadow-md active:bg-blue-700 flex items-center justify-center gap-2">
+                            <i data-lucide="file-search" class="w-4 h-4"></i> <span>Extraire le texte</span>
+                        </button>
+                    </div>
+
+                    <div class="p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl text-white shadow-lg relative overflow-hidden">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-yellow-300"></i>
+                            <span class="font-bold tracking-wide text-xs uppercase">Besoin d'aide ?</span>
+                        </div>
+                        <button type="button" onclick="generateFullRecipeAI('create')" id="btn-magic-create" class="w-full bg-white text-indigo-600 px-3 py-3 rounded-xl font-bold text-xs active:bg-indigo-50 flex items-center justify-center gap-2 shadow-sm touch-manipulation">
+                            <i data-lucide="chef-hat" class="w-4 h-4"></i> <span>Inventer une recette</span>
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Pour combien de personnes ?</label>
+                        <input type="number" id="input-servings" value="2" min="1" inputmode="numeric" class="w-full px-5 py-3 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-orange-500 focus:bg-white transition-all outline-none font-medium">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Description</label>
+                        <textarea id="input-desc" rows="2" class="w-full px-5 py-3 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-orange-500 focus:bg-white transition-all outline-none resize-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Contenu (Ingrédients & Étapes)</label>
+                        <textarea id="input-content" rows="8" placeholder="Le contenu apparaîtra ici..." class="w-full px-5 py-3 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-orange-500 focus:bg-white transition-all outline-none text-base"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Visuel</label>
+                        <div class="flex gap-3 mb-3">
+                            <div class="relative flex-1">
+                                <input type="file" id="input-image" accept="image/*" class="hidden" onchange="handleImagePreview(this)">
+                                <label for="input-image" class="flex flex-col items-center justify-center gap-1 px-4 py-4 rounded-2xl bg-gray-100 text-gray-500 font-medium cursor-pointer border-2 border-dashed border-gray-300 h-full">
+                                    <i data-lucide="upload-cloud" class="w-6 h-6 mb-1"></i> <span class="text-xs">Uploader</span>
+                                </label>
+                            </div>
+                            <button type="button" onclick="fetchWebImage()" id="btn-gen-img" class="flex-1 bg-gray-900 text-white px-4 py-4 rounded-2xl font-medium text-sm shadow-md flex flex-col items-center justify-center gap-1 active:bg-black">
+                                <i data-lucide="globe" class="w-6 h-6 mb-1 text-blue-400"></i> 
+                                <span class="text-xs text-center leading-tight">Trouver Image<br>(Gratuit)</span>
+                            </button>
+                        </div>
+                        <img id="image-preview" class="w-full h-40 object-cover rounded-2xl hidden shadow-md" />
+                    </div>
+                    <div class="h-10"></div>
+                </form>
+            </div>
+            
+            <div class="pt-4 border-t border-gray-100 bg-white">
+                <button onclick="submitForm()" class="w-full bg-orange-500 active:bg-orange-600 text-white font-bold py-4 rounded-2xl shadow-lg text-lg touch-manipulation">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="modal-overlay fixed inset-0 z-[80] hidden flex items-center justify-center p-8">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center">
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-600"><i data-lucide="info" class="w-6 h-6"></i></div>
             <h3 class="text-lg font-bold text-gray-800 mb-2" id="alert-title">Info</h3>
-            <p class="text-gray-600 text-sm mb-6 leading-relaxed" id="alert-msg">Message...</p>
-            <button onclick="closeAlert()" class="bg-indigo-600 text-white px-6 py-2 rounded-full font-medium hover:bg-indigo-700 w-full">Merci !</button>
+            <p class="text-gray-600 text-sm mb-6" id="alert-msg">Message...</p>
+            <button onclick="closeAlert()" class="bg-orange-500 text-white px-6 py-3 rounded-xl font-bold w-full">OK</button>
         </div>
     </div>
 
     <script>
-        // CONFIGURATION GEMINI
-        const apiKey = ""; // La clé est fournie par l'environnement
-        
-        // --- DONNÉES PAR DÉFAUT ---
+        const CONST_API_KEY = "AIzaSyD0q201bEj8MmUxeQvEb4LgR4QPP0YCE9M"; 
+        let userApiKey = localStorage.getItem('gemini_api_key') || "";
+        function getApiKey() { return CONST_API_KEY || userApiKey; }
+        if (CONST_API_KEY) document.getElementById('btn-config-key').classList.add('hidden');
+        else document.getElementById('btn-config-key').classList.remove('hidden');
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // --- DATA ---
         const defaultRecipes = [
             {
-                id: 'default_1',
-                title: 'Petits-Déj de Champion',
-                desc: 'Overnight Oats & Porridge "Cocon". Énergie et plaisir.',
-                image: 'http://googleusercontent.com/image_generation_content/2',
-                pdf: 'Frghy.pdf',
-                tags: ['Healthy', '5 min', 'Matin']
+                id: '1',
+                title: 'Overnight Oats',
+                desc: 'Flocons d\'avoine sans cuisson. Idéal préparé la veille.',
+                image: 'https://image.pollinations.ai/prompt/oatmeal%20porridge%20bowl%20fruit?nologo=true',
+                tags: ['Petit-Déj', 'Flocons d\'avoine', 'Healthy'],
+                servings: 1,
+                deleted: false,
+                content: `
+<h3>L'Overnight Oats</h3>
+<strong>Ingrédients</strong>
+<ul>
+    <li>40g de Flocons d'avoine</li>
+    <li>100g de Fromage blanc</li>
+    <li>1 c.à.s de Poudre d'amande</li>
+    <li>50ml de lait</li>
+    <li>1 c.à.c de Miel</li>
+    <li>1 fruit frais (Banane/Pomme)</li>
+</ul>
+<strong>Préparation</strong>
+<ol>
+    <li>Mélange tout sauf les fruits le soir.</li>
+    <li>Laisse au frigo la nuit.</li>
+    <li>Ajoute les fruits le matin.</li>
+</ol>`
             },
             {
-                id: 'default_2',
+                id: '1b',
+                title: 'Porridge Cocon',
+                desc: 'La version chaude et réconfortante des flocons d\'avoine.',
+                image: 'https://image.pollinations.ai/prompt/warm%20creamy%20oatmeal%20porridge%20bowl%20cinnamon%20apple%20cozy?nologo=true',
+                tags: ['Petit-Déj', 'Flocons d\'avoine', 'Chaud'],
+                servings: 1,
+                deleted: false,
+                content: `
+<h3>Le Porridge "Cocon"</h3>
+<strong>Ingrédients</strong>
+<ul>
+    <li>45g de Flocons d'avoine</li>
+    <li>250ml de Liquide (Moitié eau / Moitié lait)</li>
+    <li>1 c.à.s de Poudre d'amande (à la fin)</li>
+    <li>1 c.à.c de Miel ou Sirop d'érable</li>
+    <li>Topping: Cannelle, Fruits</li>
+</ul>
+<strong>Préparation</strong>
+<ol>
+    <li><strong>Cuisson:</strong> Dans une casserole, mets l'avoine et le liquide. Porte à ébullition.</li>
+    <li><strong>Mijotage:</strong> Baisse le feu (doux) et remue pendant 5-7 min jusqu'à ce que ce soit crémeux.</li>
+    <li><strong>Finition:</strong> Coupe le feu. Ajoute la poudre d'amande et mélange bien.</li>
+    <li>Sers dans un bol avec le miel et les fruits.</li>
+</ol>`
+            },
+            {
+                id: '2',
                 title: 'Carbo Crémeuse',
-                desc: 'La vraie recette italienne. Déglacage au vin blanc.',
-                image: 'http://googleusercontent.com/image_generation_content/0',
-                pdf: 'Bwjsjs-1.pdf',
-                tags: ['Italien', 'Gourmand', '25 min']
+                desc: 'La vraie recette italienne avec la technique du déglacage.',
+                image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=800&q=80',
+                tags: ['Plat Principal', 'Pâtes', 'Gourmand'],
+                servings: 2,
+                deleted: false,
+                content: `
+<h3>Ingrédients (2 Pers.)</h3>
+<ul>
+    <li>250g de Pâtes</li>
+    <li>150g de Lardons</li>
+    <li>1 Oignon JAUNE</li>
+    <li>1 Gousse d'Ail</li>
+    <li>5 cl de Vin Blanc Sec</li>
+    <li>20 cl de Crème Fraîche</li>
+    <li>1 Jaune d'Œuf</li>
+</ul>
+<h3>Préparation</h3>
+<ol>
+    <li>Cuire lardons et oignons.</li>
+    <li>Déglacer au vin blanc.</li>
+    <li>Ajouter crème et laisser mijoter.</li>
+    <li>Mélanger avec les pâtes et le jaune d'œuf hors du feu.</li>
+</ol>`
             }
         ];
 
-        // --- GESTION DE L'ÉTAT (State Management) ---
         let recipes = [];
 
         function loadRecipes() {
-            const stored = localStorage.getItem('myRecipes');
+            const stored = localStorage.getItem('myRecipes_v15'); 
             const userRecipes = stored ? JSON.parse(stored) : [];
-            recipes = [...defaultRecipes, ...userRecipes];
-            renderRecipes();
+            if (userRecipes.length === 0) recipes = [...defaultRecipes];
+            else recipes = userRecipes;
+            renderGrid();
+            updateTrashBadge();
         }
 
-        function saveUserRecipe(recipe) {
-            const stored = localStorage.getItem('myRecipes');
-            const userRecipes = stored ? JSON.parse(stored) : [];
-            userRecipes.push(recipe);
-            localStorage.setItem('myRecipes', JSON.stringify(userRecipes));
-            
-            loadRecipes();
-            closeModal();
-            // Reset form
-            document.getElementById('add-recipe-form').reset();
-            document.getElementById('ai-ingredients').value = "";
-            document.getElementById('image-container').classList.add('hidden');
-            document.getElementById('image-status-text').innerText = "Aucune image sélectionnée";
-            document.getElementById('pdf-label').innerText = "Sélectionner le PDF...";
-            currentBase64Image = null;
+        function saveRecipes() {
+            localStorage.setItem('myRecipes_v15', JSON.stringify(recipes));
+            renderGrid();
+            updateTrashBadge();
         }
 
-        // --- FONCTIONS GEMINI API ---
-
-        // Appel générique à l'API Gemini Text
-        async function callGemini(prompt, isJson = false) {
-            if (!apiKey) console.warn("API Key manquante");
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const payload = { contents: [{ parts: [{ text: prompt }] }] };
-
-            if (isJson) {
-                payload.generationConfig = {
-                    responseMimeType: "application/json",
-                    responseSchema: { type: "OBJECT", properties: { title: { type: "STRING" }, desc: { type: "STRING" } } }
-                };
-            }
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-                const text = data.candidates[0].content.parts[0].text;
-                return isJson ? JSON.parse(text) : text;
-            } catch (error) {
-                console.error("Erreur Gemini:", error);
-                showAlert("Erreur IA", "Impossible de contacter Gemini.");
-                return null;
+        function resetApp() {
+            if(confirm("⚠️ ATTENTION ⚠️\n\nCela va supprimer TOUTES vos recettes et remettre l'application à zéro.\n\nVoulez-vous continuer ?")) {
+                localStorage.removeItem('myRecipes_v15');
+                recipes = [...defaultRecipes]; 
+                setTimeout(() => { location.reload(); }, 100);
             }
         }
 
-        // NOUVEAU : Appel à l'API Imagen (Génération d'images)
-        async function generateImageWithAI() {
-            const title = document.getElementById('input-title').value;
-            const desc = document.getElementById('input-desc').value;
-
-            if (!title && !desc) {
-                showAlert("Info Manquante", "Remplissez le titre ou la description avant de générer l'image !");
-                return;
-            }
-
-            const btn = document.getElementById('btn-generate-img');
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Création...</span>`;
-            btn.disabled = true;
-
-            const prompt = `Professional food photography of ${title}, ${desc}. High resolution, appetizing, restaurant quality, cinematic lighting, 8k.`;
-            
-            // Endpoint pour Imagen 3
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-            
-            const payload = {
-                instances: [{ prompt: prompt }],
-                parameters: { sampleCount: 1 }
-            };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-
-                // Récupération de l'image Base64
-                if (data.predictions && data.predictions[0] && data.predictions[0].bytesBase64Encoded) {
-                    const base64Image = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-                    
-                    // Mise à jour de l'interface
-                    currentBase64Image = base64Image;
-                    const preview = document.getElementById('image-preview');
-                    preview.src = currentBase64Image;
-                    document.getElementById('image-container').classList.remove('hidden');
-                    document.getElementById('image-status-text').innerText = "Image générée par IA !";
-                    document.getElementById('image-status-text').classList.add('text-indigo-600', 'font-medium');
-                } else {
-                    throw new Error("Format de réponse inattendu");
-                }
-
-            } catch (error) {
-                console.error("Erreur Imagen:", error);
-                showAlert("Oups", "La génération d'image a échoué. Réessayez.");
-            } finally {
-                btn.innerHTML = originalContent;
-                btn.disabled = false;
-                lucide.createIcons();
+        function emptyTrash() {
+            if(confirm("Vider toute la corbeille ?")) {
+                // On garde seulement ceux qui ne sont PAS deleted
+                recipes = recipes.filter(r => r.deleted !== true); 
+                saveRecipes();
+                renderTrashList();
             }
         }
 
-        // Feature 1: Générer Titre/Desc depuis Ingrédients
-        async function generateRecipeInfo() {
-            const ingredients = document.getElementById('ai-ingredients').value;
-            if (!ingredients) {
-                showAlert("Attention", "Entrez d'abord quelques ingrédients !");
-                return;
-            }
-
-            const btn = document.getElementById('btn-generate');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
-            btn.disabled = true;
-
-            const prompt = `Tu es un chef cuisinier créatif. Voici des ingrédients : "${ingredients}". Imagine un nom de plat créatif et appétissant pour le champ 'title', et une description courte (20 mots max) qui donne envie pour le champ 'desc'.`;
-            
-            const result = await callGemini(prompt, true);
-
-            if (result) {
-                document.getElementById('input-title').value = result.title;
-                document.getElementById('input-desc').value = result.desc;
-            }
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            lucide.createIcons();
+        function normalizeText(text) {
+            return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
-        // Feature 2: Sommelier IA
-        async function askSommelier(recipeTitle, btnId) {
-            const btn = document.getElementById(btnId);
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-white"></i>`;
+        function searchRecipes() {
+            const rawQuery = document.getElementById('search-input').value;
+            const query = normalizeText(rawQuery);
+            const grid = document.getElementById('recipe-grid');
+            const activeRecipes = recipes.filter(r => !r.deleted);
             
-            const prompt = `Agis comme un sommelier expert. Suggère une boisson idéale (vin précis ou alternative non-alcoolisée) pour accompagner ce plat : "${recipeTitle}". Réponse très courte (1 phrase) et chaleureuse.`;
-            
-            const text = await callGemini(prompt, false);
-            
-            if (text) {
-                showAlert("✨ Conseil du Sommelier", text);
-            }
-            btn.innerHTML = `<i data-lucide="wine" class="w-4 h-4 text-white"></i>`;
-            lucide.createIcons();
+            const filtered = activeRecipes.filter(r => {
+                const inTitle = normalizeText(r.title).includes(query);
+                const inTags = (r.tags || []).some(tag => normalizeText(tag).includes(query));
+                return inTitle || inTags;
+            });
+
+            renderGrid(filtered);
         }
 
-        // --- RENDU (Rendering) ---
-        function renderRecipes() {
+        function renderGrid(dataToRender = null) {
             const grid = document.getElementById('recipe-grid');
             grid.innerHTML = '';
+            let list = dataToRender || recipes.filter(r => !r.deleted);
+            
+            if(list.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden'); return;
+            } else { document.getElementById('empty-state').classList.add('hidden'); }
 
-            if (recipes.length === 0) {
-                document.getElementById('empty-state').classList.remove('hidden');
-                return;
-            } else {
-                document.getElementById('empty-state').classList.add('hidden');
-            }
-
-            recipes.forEach((recipe, index) => {
-                const delay = index * 100;
-                const tagsHtml = (recipe.tags || []).map(tag => 
-                    `<span class="px-2 py-1 bg-white/90 backdrop-blur-sm text-xs rounded-md font-medium text-gray-700 shadow-sm">${tag}</span>`
-                ).join('');
-
+            list.forEach((r) => {
                 const card = document.createElement('div');
-                card.className = 'animate-card card-container bg-white rounded-3xl overflow-hidden shadow-lg shadow-gray-200/50 border border-gray-100 relative group';
-                card.style.animationDelay = `${delay}ms`;
-
-                const btnId = `sommelier-btn-${index}`;
-
+                card.className = 'animate-card card-container bg-white rounded-3xl overflow-hidden shadow-lg shadow-gray-200/50 cursor-pointer group relative touch-manipulation';
+                
                 card.innerHTML = `
-                    <div class="relative overflow-hidden cursor-pointer" onclick="openPDF('${recipe.pdf}')">
-                        <img src="${recipe.image}" alt="${recipe.title}" class="card-image group-hover:scale-105 transition-transform duration-700">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
-                        <div class="absolute bottom-3 left-3 flex gap-2 flex-wrap pr-16">
-                            ${tagsHtml}
-                        </div>
+                    <div class="h-48 overflow-hidden relative" onclick="openReadModalById('${r.id}')">
+                        <img src="${r.image}" class="card-image w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/5 active:bg-black/10 transition-colors"></div>
                     </div>
-                    
-                    <button id="${btnId}" onclick="event.stopPropagation(); askSommelier('${recipe.title.replace(/'/g, "\\'")}', '${btnId}')" 
-                            class="absolute top-3 right-3 w-10 h-10 rounded-full ai-sparkle-btn shadow-lg flex items-center justify-center z-10 transition-transform active:scale-90"
-                            title="Accord Mets-Vins par IA">
-                        <i data-lucide="wine" class="w-4 h-4 text-white"></i>
-                    </button>
-
-                    <div class="p-5 cursor-pointer" onclick="openPDF('${recipe.pdf}')">
-                        <div class="flex justify-between items-start">
-                            <h3 class="text-xl font-bold text-gray-800 leading-tight mb-1">${recipe.title}</h3>
+                    <div class="absolute top-3 right-3 flex gap-2">
+                         <button onclick="event.stopPropagation(); editRecipe('${r.id}')" class="bg-white/90 backdrop-blur text-blue-600 p-2 rounded-full shadow-sm active:scale-90 transition-transform"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                         <button onclick="event.stopPropagation(); softDeleteRecipe('${r.id}')" class="bg-white/90 backdrop-blur text-red-600 p-2 rounded-full shadow-sm active:scale-90 transition-transform"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="p-5" onclick="openReadModalById('${r.id}')">
+                        <div class="flex gap-2 mb-2 flex-wrap">
+                            ${(r.tags || []).slice(0,3).map(t => `<span class="text-[10px] uppercase font-bold tracking-wider text-gray-500 bg-gray-100 px-2 py-1 rounded-md">${t}</span>`).join('')}
                         </div>
-                        <p class="text-gray-500 text-sm line-clamp-2">${recipe.desc}</p>
+                        <h3 class="text-lg font-bold text-gray-800 font-serif leading-tight mb-1">${r.title}</h3>
+                        <p class="text-gray-500 text-xs line-clamp-2">${r.desc}</p>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -482,115 +446,334 @@
             lucide.createIcons();
         }
 
-        // --- UTILITAIRES MODAL & ALERTE ---
+        function softDeleteRecipe(id) {
+            const index = recipes.findIndex(r => r.id === id.toString());
+            if (index !== -1) {
+                recipes[index].deleted = true;
+                saveRecipes();
+                renderGrid();
+                showAlert("Corbeille", "Recette déplacée dans la corbeille.");
+            }
+        }
+
+        function restoreRecipe(id) {
+            const index = recipes.findIndex(r => r.id === id.toString());
+            if (index !== -1) {
+                recipes[index].deleted = false;
+                saveRecipes();
+                renderTrashList();
+                renderGrid();
+            }
+        }
+
+        function permanentDeleteRecipe(id) {
+            if(confirm("Supprimer définitivement ?")) {
+                recipes = recipes.filter(r => r.id !== id.toString());
+                saveRecipes();
+                renderTrashList();
+            }
+        }
+
+        function openTrashModal() {
+            document.getElementById('trash-modal').classList.remove('hidden');
+            setTimeout(()=>document.querySelector('#trash-modal > div').classList.remove('translate-y-full'), 10);
+            renderTrashList();
+        }
+
+        function closeTrashModal() {
+            document.querySelector('#trash-modal > div').classList.add('translate-y-full');
+            setTimeout(()=>document.getElementById('trash-modal').classList.add('hidden'), 300);
+        }
+
+        function renderTrashList() {
+            const list = document.getElementById('trash-list');
+            list.innerHTML = '';
+            const deletedRecipes = recipes.filter(r => r.deleted);
+
+            if (deletedRecipes.length === 0) {
+                list.innerHTML = '<div class="text-center py-10 text-gray-400">Corbeille vide</div>';
+                return;
+            }
+
+            deletedRecipes.forEach(r => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100';
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${r.image}" class="w-12 h-12 rounded-lg object-cover">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm line-clamp-1">${r.title}</h4>
+                            <span class="text-xs text-gray-500">Supprimé</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="restoreRecipe('${r.id}')" class="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>
+                        <button onclick="permanentDeleteRecipe('${r.id}')" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function updateTrashBadge() {
+            const count = recipes.filter(r => r.deleted).length;
+            const badge = document.getElementById('trash-badge');
+            if(count > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+        }
+
+        function openReadModalById(id) { const recipe = recipes.find(r => r.id === id.toString()); if(recipe) openReadModal(recipe); }
+
+        function openReadModal(recipe) {
+            currentViewingRecipe = recipe;
+            baseServings = recipe.servings ? parseInt(recipe.servings) : 2; 
+            currentServings = baseServings;
+            originalContent = recipe.content || "<p>Aucune instruction.</p>";
+
+            document.getElementById('portion-display').innerText = currentServings;
+            document.getElementById('read-img').src = recipe.image;
+            document.getElementById('read-title').innerText = recipe.title;
+            document.getElementById('read-desc').innerText = recipe.desc;
+            
+            document.getElementById('read-tags').innerHTML = (recipe.tags || []).map(t => `<span class="px-2 py-1 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold rounded-full">${t}</span>`).join('');
+            document.getElementById('read-content').innerHTML = originalContent;
+            document.getElementById('sommelier-text').innerText = "Toucher pour demander...";
+            document.getElementById('chat-history').innerHTML = `<div class="chat-ai p-3 rounded-lg max-w-[90%]">Bonjour ! Une question sur la recette "${recipe.title}" ?</div>`;
+
+            document.getElementById('read-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeReadModal() { document.getElementById('read-modal').classList.add('hidden'); document.body.style.overflow = ''; currentViewingRecipe = null; }
+
+        function changePortions(delta) {
+            const newServings = currentServings + delta;
+            if (newServings < 1) return;
+            currentServings = newServings;
+            document.getElementById('portion-display').innerText = currentServings;
+            const ratio = currentServings / baseServings;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = originalContent;
+            const listItems = tempDiv.querySelectorAll('li');
+            
+            listItems.forEach(li => {
+                li.innerHTML = li.innerHTML.replace(/^(\d+(?:[.,]\d+)?)(?=\s*(g|ml|cl|l|kg|c\.à\.s|c\.à\.c|tranches|pincée|Oignon|Gousse|Jaune|oeuf))/i, (match) => {
+                    let val = parseFloat(match.replace(',', '.'));
+                    let newVal = Math.ceil(val * ratio * 10) / 10; 
+                    return `<span class="dynamic-qty">${newVal}</span>`;
+                });
+            });
+            document.getElementById('read-content').innerHTML = tempDiv.innerHTML;
+        }
+
+        async function callGemini(prompt, isJson = false) {
+            const key = getApiKey();
+            if (!key) { if(!CONST_API_KEY) openApiModal(); else showAlert("Erreur", "Clé API invalide"); return null; }
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+            if(isJson) payload.generationConfig = { responseMimeType: "application/json" };
+            try {
+                const res = await fetch(url, { method: 'POST', body: JSON.stringify(payload) });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error.message);
+                return data.candidates[0].content.parts[0].text;
+            } catch(e) { console.error(e); showAlert("Erreur IA", "Vérifiez la connexion."); return null; }
+        }
+
+        function fetchWebImage() {
+            const title = document.getElementById('input-title').value;
+            if(!title) { showAlert("Info", "Entrez un titre pour chercher."); return; }
+            
+            const btn = document.getElementById('btn-gen-img');
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-6 h-6 text-blue-400"></i>`;
+            
+            const query = encodeURIComponent(title + " appetizing food photography michelin style");
+            const imageUrl = `https://image.pollinations.ai/prompt/${query}?width=800&height=600&nologo=true&seed=${Math.random()}`;
+            
+            const img = new Image();
+            img.onload = () => {
+                currentBase64Image = imageUrl;
+                document.getElementById('image-preview').src = imageUrl;
+                document.getElementById('image-preview').classList.remove('hidden');
+                btn.innerHTML = `<i data-lucide="check" class="w-6 h-6 text-green-400"></i><span class="text-xs">Trouvé !</span>`;
+                setTimeout(() => btn.innerHTML = oldHtml, 3000);
+            };
+            img.onerror = () => {
+                showAlert("Oups", "Impossible de charger l'image.");
+                btn.innerHTML = oldHtml;
+            };
+            img.src = imageUrl;
+        }
+
+        async function askSommelierInternal() {
+            if(!currentViewingRecipe) return;
+            const txt = document.getElementById('sommelier-text'); const oldTxt = txt.innerText; txt.innerText = "Réflexion...";
+            const prompt = `Sommelier expert. Recette: "${currentViewingRecipe.title}". Ingredients: "${currentViewingRecipe.content}". Suggère UN vin (ou bière) et UNE boisson sans alcool. Court.`;
+            const response = await callGemini(prompt);
+            if(response) txt.innerText = response; else txt.innerText = oldTxt;
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input'); const question = input.value.trim();
+            if (!question || !currentViewingRecipe) return;
+            const history = document.getElementById('chat-history');
+            history.innerHTML += `<div class="chat-msg chat-user">${question}</div>`; input.value = ""; history.scrollTop = history.scrollHeight;
+            const prompt = `Chef expert. Recette: ${currentViewingRecipe.title}. Contenu: ${currentViewingRecipe.content}. Question: ${question}. Réponse courte et utile.`;
+            const response = await callGemini(prompt);
+            if(response) { history.innerHTML += `<div class="chat-msg chat-ai">${response}</div>`; history.scrollTop = history.scrollHeight; }
+        }
+
+        let currentPdfFile = null;
+        function handlePdfSelect(input) {
+            if (input.files && input.files[0]) {
+                currentPdfFile = input.files[0];
+                document.getElementById('pdf-label').innerText = currentPdfFile.name;
+                document.getElementById('btn-extract-pdf').classList.remove('hidden');
+            }
+        }
+
+        async function extractAndFormatPdf() {
+            if (!currentPdfFile) return;
+            const btn = document.getElementById('btn-extract-pdf'); const oldHtml = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-4 h-4"></i> Lecture...`;
+            
+            try {
+                const arrayBuffer = await currentPdfFile.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                let fullText = "";
+                const maxPages = Math.min(pdf.numPages, 5);
+                for (let i = 1; i <= maxPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    fullText += textContent.items.map(item => item.str).join(' ') + "\n";
+                }
+                if (!fullText.trim()) throw new Error("Aucun texte trouvé");
+                btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-4 h-4"></i> Analyse...`;
+                const prompt = `Assistant culinaire. Texte PDF: "${fullText.substring(0, 8000)}".
+                1. Formate en Markdown (### Ingrédients, ### Préparation) SANS CHANGER quantités.
+                2. Trouve pour combien de personnes (ex: "6 personnes"). Si pas trouvé, estime.
+                3. Identifie 1 ou 2 ingrédients principaux pour les tags (ex: "Avoine", "Chocolat").
+                JSON: {"desc": "Résumé", "content": "Markdown...", "servings": 4, "tags": ["Tag1", "Tag2"]}`;
+                const res = await callGemini(prompt, true);
+                if(res) {
+                    const data = JSON.parse(res);
+                    document.getElementById('input-desc').value = data.desc;
+                    document.getElementById('input-content').value = data.content;
+                    if(data.servings) document.getElementById('input-servings').value = data.servings;
+                    if(!document.getElementById('input-title').value) document.getElementById('input-title').value = currentPdfFile.name.replace('.pdf', '');
+                    document.getElementById('add-recipe-form').dataset.tags = JSON.stringify(data.tags || []);
+                    showAlert("Succès", "Recette extraite ! Portions détectées : " + (data.servings || 2));
+                }
+            } catch (e) { console.error(e); showAlert("Erreur", "Lecture PDF impossible."); } 
+            finally { btn.innerHTML = oldHtml; }
+        }
+
+        async function generateFullRecipeAI(mode) {
+            const title = document.getElementById('input-title').value;
+            if(!title) { showAlert("Info", "Titre manquant"); return; }
+            const btn = document.getElementById('btn-magic-create'); const oldHtml = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-4 h-4"></i>`;
+            const prompt = `Chef étoilé. Recette pour : "${title}". JSON: {"desc": "Court", "content": "Markdown...", "servings": 2, "tags": ["Ingrédient Principal"]}`;
+            const res = await callGemini(prompt, true);
+            if(res) {
+                const data = JSON.parse(res);
+                document.getElementById('input-desc').value = data.desc;
+                document.getElementById('input-content').value = data.content;
+                document.getElementById('input-servings').value = data.servings || 2;
+                document.getElementById('add-recipe-form').dataset.tags = JSON.stringify(data.tags || []);
+            }
+            btn.innerHTML = oldHtml;
+        }
+
+        // --- FORMULAIRE ---
         let currentBase64Image = null;
 
-        function showAlert(title, msg) {
-            const modal = document.getElementById('alert-modal');
-            const content = document.getElementById('alert-content');
-            document.getElementById('alert-title').innerText = title;
-            document.getElementById('alert-msg').innerText = msg;
-            
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
+        function openAddModal() {
+            document.getElementById('add-recipe-form').reset();
+            delete document.getElementById('add-recipe-form').dataset.tags; // Reset tags
+            document.getElementById('input-id').value = "";
+            document.getElementById('modal-title').innerText = "Ajouter";
+            document.getElementById('input-servings').value = "2"; 
+            document.getElementById('image-preview').classList.add('hidden');
+            document.getElementById('btn-extract-pdf').classList.add('hidden');
+            document.getElementById('pdf-label').innerText = "Choisir un fichier...";
+            currentBase64Image = null;
+            currentPdfFile = null;
+            document.getElementById('add-modal').classList.remove('hidden');
+            setTimeout(()=>document.querySelector('#add-modal > div').classList.remove('translate-y-full'), 10);
         }
 
-        function closeAlert() {
-            const modal = document.getElementById('alert-modal');
-            const content = document.getElementById('alert-content');
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        function openModal() {
-            const modal = document.getElementById('modal');
-            const content = document.getElementById('modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('translate-y-full');
-            }, 10);
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('modal');
-            const content = document.getElementById('modal-content');
-            content.classList.add('translate-y-full');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        document.getElementById('modal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('modal')) closeModal();
-        });
-
-        // Gestion Upload Image
+        function closeAddModal() { document.querySelector('#add-modal > div').classList.add('translate-y-full'); setTimeout(()=>document.getElementById('add-modal').classList.add('hidden'), 300); }
+        
         function handleImagePreview(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentBase64Image = e.target.result;
-                    const preview = document.getElementById('image-preview');
-                    preview.src = currentBase64Image;
-                    document.getElementById('image-container').classList.remove('hidden');
-                    document.getElementById('image-status-text').innerText = "Image locale chargée";
-                }
+                reader.onload = function(e) { currentBase64Image = e.target.result; document.getElementById('image-preview').src = currentBase64Image; document.getElementById('image-preview').classList.remove('hidden'); }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // Gestion Nom PDF
-        function handlePdfName(input) {
-            if (input.files && input.files[0]) {
-                document.getElementById('pdf-label').innerText = input.files[0].name;
-            }
-        }
-
-        // Soumission Formulaire
-        document.getElementById('add-recipe-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
+        function submitForm() {
+            const id = document.getElementById('input-id').value;
             const title = document.getElementById('input-title').value;
             const desc = document.getElementById('input-desc').value;
-            const tagsInput = document.getElementById('input-tags').value;
-            const pdfInput = document.getElementById('input-pdf');
+            const rawContent = document.getElementById('input-content').value;
+            const content = rawContent.includes('#') ? marked.parse(rawContent) : rawContent;
+            const servings = parseInt(document.getElementById('input-servings').value) || 2;
             
-            const image = currentBase64Image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80';
-            const pdfName = pdfInput.files[0] ? pdfInput.files[0].name : 'unknown.pdf';
+            let tags = ['Maison'];
+            const aiTagsJson = document.getElementById('add-recipe-form').dataset.tags;
+            if(aiTagsJson) { try { tags = JSON.parse(aiTagsJson); } catch(e){} }
 
-            const newRecipe = {
-                id: Date.now(),
-                title: title,
-                desc: desc,
-                image: image,
-                pdf: pdfName,
-                tags: tagsInput.split(',').map(t => t.trim()).filter(t => t)
-            };
-
-            saveUserRecipe(newRecipe);
-        });
-
-        // Logique Android
-        function openPDF(filename) {
-            if (typeof Android !== 'undefined' && Android.openPDF) {
-                Android.openPDF(filename);
+            if (id) {
+                const index = recipes.findIndex(r => r.id === id);
+                if (index !== -1) {
+                    recipes[index].title = title;
+                    recipes[index].desc = desc;
+                    recipes[index].content = content;
+                    recipes[index].servings = servings;
+                    if(currentBase64Image) recipes[index].image = currentBase64Image;
+                    if(aiTagsJson) recipes[index].tags = tags;
+                }
             } else {
-                console.log(`Ouverture simulée de : ${filename}`);
+                const newRecipe = {
+                    id: Date.now().toString(),
+                    title, desc, content, servings,
+                    image: currentBase64Image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+                    tags: tags,
+                    deleted: false
+                };
+                recipes.push(newRecipe);
             }
+            saveRecipes();
+            closeAddModal();
         }
 
-        // Init
-        window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            loadRecipes();
-        });
+        function editRecipe(id) {
+            const recipe = recipes.find(r => r.id === id.toString()); if(!recipe) return;
+            document.getElementById('input-id').value = recipe.id;
+            document.getElementById('input-title').value = recipe.title;
+            document.getElementById('input-desc').value = recipe.desc;
+            document.getElementById('input-content').value = recipe.content.replace(/<[^>]*>?/gm, '');
+            document.getElementById('input-servings').value = recipe.servings || 2;
+            document.getElementById('modal-title').innerText = "Modifier";
+            if(recipe.image) { 
+                currentBase64Image = recipe.image; 
+                document.getElementById('image-preview').src = recipe.image; 
+                document.getElementById('image-preview').classList.remove('hidden'); 
+            }
+            document.getElementById('add-modal').classList.remove('hidden');
+            setTimeout(()=>document.querySelector('#add-modal > div').classList.remove('translate-y-full'), 10);
+        }
 
+        function openApiModal() { document.getElementById('api-modal').classList.remove('hidden'); }
+        function saveApiKey() { const key = document.getElementById('api-input').value.trim(); if(key) { localStorage.setItem('gemini_api_key', key); userApiKey = key; document.getElementById('api-modal').classList.add('hidden'); } }
+        function showAlert(t, m) { document.getElementById('alert-title').innerText = t; document.getElementById('alert-msg').innerText = m; document.getElementById('alert-modal').classList.remove('hidden'); }
+        function closeAlert() { document.getElementById('alert-modal').classList.add('hidden'); }
+
+        window.addEventListener('DOMContentLoaded', loadRecipes);
     </script>
 </body>
 </html>
