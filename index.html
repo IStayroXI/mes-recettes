@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mes Recettes - Joshua Jaunasse</title>
+    <title>Mes Recettes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -21,6 +21,8 @@
         .card-image { height: 200px; width: 100%; object-fit: cover; transition: transform 0.7s ease; }
         .card-container:active .card-image { transform: scale(1.05); }
         .modal-overlay { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); transition: opacity 0.3s ease; }
+        
+        /* Style Recette */
         .recipe-content { color: #374151; font-size: 0.95rem; line-height: 1.6; }
         .recipe-content h3 { font-size: 1.3rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.8rem; color: #ea580c; font-family: 'Playfair Display', serif; border-bottom: 2px solid #fed7aa; padding-bottom: 0.2rem; display: inline-block; }
         .recipe-content ul { background-color: #fefce8; border: 1px solid #fef08a; border-radius: 1rem; padding: 1.2rem; margin-bottom: 1.5rem; list-style: none; }
@@ -30,19 +32,22 @@
         .recipe-content ol { counter-reset: step-counter; list-style: none; padding: 0; }
         .recipe-content ol li { position: relative; padding-left: 2.5rem; margin-bottom: 1.2rem; }
         .recipe-content ol li::before { content: counter(step-counter); counter-increment: step-counter; position: absolute; left: 0; top: 0; width: 1.8rem; height: 1.8rem; background-color: #fdba74; color: white; border-radius: 50%; text-align: center; line-height: 1.8rem; font-weight: bold; font-size: 0.85rem; }
-        .chat-msg { padding: 10px 14px; border-radius: 14px; max-width: 85%; font-size: 0.9rem; margin-bottom: 8px; }
+        
+        /* Chat Correction Mobile */
+        .chat-container { width: 100%; max-width: 100%; box-sizing: border-box; }
+        .chat-input-wrapper { display: flex; gap: 0.5rem; width: 100%; }
+        .chat-msg { padding: 10px 14px; border-radius: 14px; max-width: 85%; font-size: 0.9rem; margin-bottom: 8px; word-wrap: break-word; }
         .chat-user { background-color: #f3f4f6; color: #1f2937; align-self: flex-end; border-bottom-right-radius: 2px; }
         .chat-ai { background-color: #eff6ff; color: #1e40af; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #dbeafe; }
     </style>
 </head>
 <body class="pb-24">
 
-    <!-- Header -->
     <header class="glass fixed top-0 w-full z-40 px-6 py-4 transition-all duration-300">
         <div class="flex justify-between items-center mb-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Mes Recettes</h1>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Carnet Digital</p>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Joshua Jaunasse</p>
             </div>
             <div class="flex gap-2">
                 <button onclick="openTrashModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 p-3 rounded-full transition-colors relative">
@@ -58,10 +63,9 @@
             </div>
         </div>
         
-        <!-- BARRE DE RECHERCHE -->
         <div class="relative">
             <i data-lucide="search" class="absolute left-4 top-3.5 w-5 h-5 text-gray-400"></i>
-            <input type="text" id="search-input" onkeyup="searchRecipes()" placeholder="Rechercher (ex: avoine, pâtes...)" 
+            <input type="text" id="search-input" onkeyup="searchRecipes()" placeholder="Rechercher..." 
                    class="w-full pl-12 pr-4 py-3 bg-gray-100 rounded-2xl border-none focus:bg-white focus:ring-2 focus:ring-orange-200 outline-none text-sm transition-all shadow-inner">
         </div>
     </header>
@@ -70,24 +74,20 @@
 
     <main class="container mx-auto px-4 max-w-lg">
         <div id="recipe-grid" class="grid gap-6 mt-2 pb-10"></div>
-        
         <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center opacity-50">
             <i data-lucide="chef-hat" class="w-20 h-20 mb-4 text-gray-300"></i>
             <p class="text-gray-400 font-medium">Aucune recette trouvée.</p>
         </div>
-
-        <!-- FOOTER / SIGNATURE -->
+        
         <div class="mt-12 text-center pb-8 border-t border-gray-200 pt-8">
             <p class="text-xs text-gray-400 font-medium uppercase tracking-widest mb-2">Application créée par</p>
             <p class="text-lg font-serif font-bold text-gray-700">Joshua Jaunasse</p>
             <p class="text-[10px] text-indigo-400 mt-1 flex items-center justify-center gap-1 opacity-80">
-                <span>Avec l'aide de Gemini</span>
-                <i data-lucide="sparkles" class="w-3 h-3"></i>
+                <span>Avec l'aide de Gemini</span><i data-lucide="sparkles" class="w-3 h-3"></i>
             </p>
         </div>
     </main>
 
-    <!-- MODAL CORBEILLE -->
     <div id="trash-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center sm:p-4">
         <div class="bg-white w-full max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl transform transition-transform duration-300 translate-y-full sm:translate-y-0 flex flex-col h-[85vh]">
             <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
@@ -96,21 +96,14 @@
                 </h2>
                 <button onclick="closeTrashModal()" class="p-2 bg-gray-100 rounded-full text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            
             <div id="trash-list" class="flex-1 overflow-y-auto space-y-3 pb-4"></div>
-            
             <div class="mt-4 pt-4 border-t border-gray-100 space-y-3">
-                <button onclick="emptyTrash()" class="w-full py-3 text-red-500 font-bold bg-red-50 rounded-xl hover:bg-red-100 text-sm">
-                    Vider la corbeille
-                </button>
-                <button onclick="resetApp()" class="w-full py-3 text-gray-400 font-medium text-xs hover:text-red-500 transition-colors">
-                    ⚠️ Réinitialiser l'application (Usine)
-                </button>
+                <button onclick="emptyTrash()" class="w-full py-3 text-red-500 font-bold bg-red-50 rounded-xl hover:bg-red-100 text-sm">Vider la corbeille</button>
+                <button onclick="resetApp()" class="w-full py-3 text-gray-400 font-medium text-xs hover:text-red-500 transition-colors">⚠️ Réinitialiser l'application (Usine)</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL LECTURE -->
     <div id="read-modal" class="modal-overlay fixed inset-0 z-50 hidden overflow-y-auto overscroll-contain">
         <div class="min-h-screen px-0 sm:px-4 py-0 sm:py-8 flex items-center justify-center">
             <div class="bg-white w-full max-w-lg sm:rounded-3xl shadow-2xl overflow-hidden relative min-h-screen sm:min-h-0">
@@ -149,14 +142,14 @@
 
                     <div id="read-content" class="recipe-content text-base leading-relaxed border-b pb-8 mb-8 border-gray-100"></div>
 
-                    <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 pb-8">
+                    <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 pb-8 chat-container">
                         <div class="flex items-center gap-2 mb-4 text-gray-700 font-bold font-serif text-lg">
                             <i data-lucide="message-circle-question" class="w-5 h-5 text-orange-500"></i><h3>SOS Chef</h3>
                         </div>
                         <div id="chat-history" class="flex flex-col gap-2 max-h-48 overflow-y-auto mb-3 text-sm"></div>
-                        <div class="flex gap-2">
-                            <input type="text" id="chat-input" placeholder="Une question ?" inputmode="text" class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-orange-500 text-base shadow-sm">
-                            <button onclick="sendChatMessage()" class="bg-orange-500 text-white px-4 rounded-xl active:bg-orange-600 transition-colors"><i data-lucide="send" class="w-5 h-5"></i></button>
+                        <div class="chat-input-wrapper">
+                            <input type="text" id="chat-input" placeholder="Une question ?" inputmode="text" class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-orange-500 text-base shadow-sm min-w-0">
+                            <button onclick="sendChatMessage()" class="bg-orange-500 text-white px-4 rounded-xl active:bg-orange-600 transition-colors shrink-0"><i data-lucide="send" class="w-5 h-5"></i></button>
                         </div>
                     </div>
                 </div>
@@ -164,7 +157,6 @@
         </div>
     </div>
 
-    <!-- MODAL API KEY -->
     <div id="api-modal" class="modal-overlay fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-2">Clé API</h3>
@@ -174,7 +166,6 @@
         </div>
     </div>
 
-    <!-- MODAL AJOUT/EDITION -->
     <div id="add-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center sm:p-4">
         <div class="bg-white w-full max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl transform transition-transform duration-300 translate-y-full sm:translate-y-0 flex flex-col h-[90vh] sm:max-h-[85vh]">
             <div class="flex justify-between items-center mb-4 flex-shrink-0">
@@ -256,7 +247,6 @@
         </div>
     </div>
 
-    <!-- Alert Modal -->
     <div id="alert-modal" class="modal-overlay fixed inset-0 z-[80] hidden flex items-center justify-center p-8">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center">
             <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-600"><i data-lucide="info" class="w-6 h-6"></i></div>
@@ -267,6 +257,7 @@
     </div>
 
     <script>
+        // CONFIG CLÉ API
         const CONST_API_KEY = "AIzaSyD0q201bEj8MmUxeQvEb4LgR4QPP0YCE9M"; 
         let userApiKey = localStorage.getItem('gemini_api_key') || "";
         function getApiKey() { return CONST_API_KEY || userApiKey; }
@@ -286,21 +277,22 @@
                 servings: 1,
                 deleted: false,
                 content: `
-<h3>L'Overnight Oats</h3>
+<h3>L'Overnight Oats (Sans Cuisson)</h3>
 <strong>Ingrédients</strong>
 <ul>
-    <li>40g de Flocons d'avoine</li>
-    <li>100g de Fromage blanc</li>
-    <li>1 c.à.s de Poudre d'amande</li>
-    <li>50ml de lait</li>
+    <li>40g de Flocons d'avoine (environ 4 c.à.s)</li>
+    <li>80g à 100g de Fromage blanc (selon ta faim)</li>
+    <li>1 c.à.s de Poudre d'amande (Le secret goût!)</li>
+    <li>4-5 c.à.s d'eau ou lait (pour détendre)</li>
     <li>1 c.à.c de Miel</li>
-    <li>1 fruit frais (Banane/Pomme)</li>
+    <li>Topping: 1 fruit frais (Banane ou Pomme)</li>
 </ul>
 <strong>Préparation</strong>
 <ol>
-    <li>Mélange tout sauf les fruits le soir.</li>
-    <li>Laisse au frigo la nuit.</li>
-    <li>Ajoute les fruits le matin.</li>
+    <li><strong>Le Soir (2 min):</strong> Dans un bol, mélange l'avoine, la poudre d'amande, le fromage blanc, le miel et le liquide.</li>
+    <li><strong>Le Repos:</strong> Couvre et laisse au frigo toute la nuit. L'avoine va devenir tendre.</li>
+    <li><strong>Le Matin:</strong> Ajoute tes fruits coupés juste avant de manger.</li>
+    <li><strong>Astuce:</strong> Bois ton jus d'orange 10 min avant pour bien séparer les saveurs!</li>
 </ol>`
             },
             {
@@ -312,7 +304,7 @@
                 servings: 1,
                 deleted: false,
                 content: `
-<h3>Le Porridge "Cocon"</h3>
+<h3>Le Porridge "Cocon" (Chaud)</h3>
 <strong>Ingrédients</strong>
 <ul>
     <li>45g de Flocons d'avoine</li>
@@ -331,37 +323,40 @@
             },
             {
                 id: '2',
-                title: 'Carbo Crémeuse',
-                desc: 'La vraie recette italienne avec la technique du déglacage.',
+                title: 'Carbo Crémeuse & Déglacée',
+                desc: 'La vraie recette italienne avec la technique du déglacage au vin blanc.',
                 image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=800&q=80',
-                tags: ['Plat Principal', 'Pâtes', 'Gourmand'],
+                tags: ['Confort', 'Italien', 'Gourmand'],
                 servings: 2,
                 deleted: false,
                 content: `
 <h3>Ingrédients (2 Pers.)</h3>
 <ul>
-    <li>250g de Pâtes</li>
-    <li>150g de Lardons</li>
-    <li>1 Oignon JAUNE</li>
-    <li>1 Gousse d'Ail</li>
-    <li>5 cl de Vin Blanc Sec</li>
-    <li>20 cl de Crème Fraîche</li>
-    <li>1 Jaune d'Œuf</li>
+    <li>250g de Pâtes (Tagliatelles/Spaghetti)</li>
+    <li>150g de Lardons Fumés</li>
+    <li>1 Oignon JAUNE (moyen)</li>
+    <li>1 Gousse d'Ail (Dégermée)</li>
+    <li>5 cl de Vin Blanc Sec (Déglacage)</li>
+    <li>20 cl de Crème Fraîche (Épaisse 30%)</li>
+    <li>1 Jaune d'Œuf (Gros)</li>
+    <li>Poivre noir et Muscade</li>
 </ul>
-<h3>Préparation</h3>
+<h3>La Préparation (Pas à Pas)</h3>
 <ol>
-    <li>Cuire lardons et oignons.</li>
-    <li>Déglacer au vin blanc.</li>
-    <li>Ajouter crème et laisser mijoter.</li>
-    <li>Mélanger avec les pâtes et le jaune d'œuf hors du feu.</li>
+    <li><strong>La Cuisson "Cramée" (Le goût):</strong> Dans une poêle, feu moyen/vif. PAS DE MATIÈRE GRASSE. Jetez les lardons. Quand le gras fond, ajoutez l'oignon. Laissez cuire jusqu'à ce que les lardons soient grillés et l'oignon bien doré. Le fond de la poêle doit attacher un peu.</li>
+    <li><strong>L'Instant Critique (Ail & Vin):</strong> Ajoutez l'ail haché. Remuez 30 secondes (pas plus, sinon c'est amer!). Versez le <strong>Vin Blanc</strong> d'un coup. Pschhh! Avec une cuillère en bois, grattez fort le fond de la poêle pour décoller les sucs marrons. Laissez bouillir 1 minute.</li>
+    <li><strong>La Crème (Mijotage):</strong> Baissez le feu (doux). Versez la crème fraîche. Poivrez généreusement + Muscade. Laissez mijoter 5 minutes (la sauce va épaissir). Si vous mangez plus tard: Coupez le feu ici. Réchauffez avec le lait au moment de manger.</li>
+    <li><strong>L'Assemblage Final:</strong> Cuisez les pâtes al dente. Gardez une petite louche d'eau de cuisson au cas où. Jetez les pâtes égouttées dans la poêle de sauce chaude. Mélangez.</li>
+    <li><strong>La Touche du Chef (Liaison):</strong> COUPEZ LE FEU IMPÉRATIVEMENT. Ajoutez les jaunes d'œufs. Mélangez comme une brute immédiatement pour lier la sauce et la rendre brillante. Servez direct!</li>
 </ol>`
             }
         ];
 
         let recipes = [];
 
+        // VERSION 16 DB (Finale)
         function loadRecipes() {
-            const stored = localStorage.getItem('myRecipes_v15'); 
+            const stored = localStorage.getItem('myRecipes_v16'); 
             const userRecipes = stored ? JSON.parse(stored) : [];
             if (userRecipes.length === 0) recipes = [...defaultRecipes];
             else recipes = userRecipes;
@@ -370,14 +365,14 @@
         }
 
         function saveRecipes() {
-            localStorage.setItem('myRecipes_v15', JSON.stringify(recipes));
+            localStorage.setItem('myRecipes_v16', JSON.stringify(recipes));
             renderGrid();
             updateTrashBadge();
         }
 
         function resetApp() {
             if(confirm("⚠️ ATTENTION ⚠️\n\nCela va supprimer TOUTES vos recettes et remettre l'application à zéro.\n\nVoulez-vous continuer ?")) {
-                localStorage.removeItem('myRecipes_v15');
+                localStorage.removeItem('myRecipes_v16');
                 recipes = [...defaultRecipes]; 
                 setTimeout(() => { location.reload(); }, 100);
             }
@@ -385,10 +380,11 @@
 
         function emptyTrash() {
             if(confirm("Vider toute la corbeille ?")) {
-                // On garde seulement ceux qui ne sont PAS deleted
-                recipes = recipes.filter(r => r.deleted !== true); 
+                recipes = recipes.filter(r => !r.deleted); 
                 saveRecipes();
                 renderTrashList();
+                updateTrashBadge();
+                setTimeout(() => { renderTrashList(); }, 50);
             }
         }
 
@@ -577,20 +573,24 @@
                 const res = await fetch(url, { method: 'POST', body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.error) throw new Error(data.error.message);
-                return data.candidates[0].content.parts[0].text;
+                
+                // CLEAN UP: Retirer les balises markdown ```json si présentes
+                let text = data.candidates[0].content.parts[0].text;
+                text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+                return text;
+
             } catch(e) { console.error(e); showAlert("Erreur IA", "Vérifiez la connexion."); return null; }
         }
 
         function fetchWebImage() {
             const title = document.getElementById('input-title').value;
             if(!title) { showAlert("Info", "Entrez un titre pour chercher."); return; }
-            
-            const btn = document.getElementById('btn-gen-img');
-            const oldHtml = btn.innerHTML;
+            const btn = document.getElementById('btn-gen-img'); const oldHtml = btn.innerHTML;
             btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-6 h-6 text-blue-400"></i>`;
             
+            // Random Seed pour changer d'image
             const query = encodeURIComponent(title + " appetizing food photography michelin style");
-            const imageUrl = `https://image.pollinations.ai/prompt/${query}?width=800&height=600&nologo=true&seed=${Math.random()}`;
+            const imageUrl = `https://image.pollinations.ai/prompt/${query}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 10000)}`;
             
             const img = new Image();
             img.onload = () => {
@@ -598,12 +598,9 @@
                 document.getElementById('image-preview').src = imageUrl;
                 document.getElementById('image-preview').classList.remove('hidden');
                 btn.innerHTML = `<i data-lucide="check" class="w-6 h-6 text-green-400"></i><span class="text-xs">Trouvé !</span>`;
-                setTimeout(() => btn.innerHTML = oldHtml, 3000);
+                setTimeout(() => btn.innerHTML = oldHtml, 3000); // Remet le bouton original
             };
-            img.onerror = () => {
-                showAlert("Oups", "Impossible de charger l'image.");
-                btn.innerHTML = oldHtml;
-            };
+            img.onerror = () => { showAlert("Oups", "Impossible de charger l'image."); btn.innerHTML = oldHtml; };
             img.src = imageUrl;
         }
 
@@ -741,7 +738,7 @@
                 const newRecipe = {
                     id: Date.now().toString(),
                     title, desc, content, servings,
-                    image: currentBase64Image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+                    image: currentBase64Image || '[https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80)',
                     tags: tags,
                     deleted: false
                 };
